@@ -1,6 +1,6 @@
 name: Build aws
 
- on: 
+ on:
    push:
      branches:
        - master
