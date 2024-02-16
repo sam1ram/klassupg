@@ -16,11 +16,10 @@ jobs:
       - name: Setup .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '8.0.101' # Uppdaterad version till 8.0.101
+          dotnet-version: '8.0.101' 
 
       - name: Build and Publish Project
         run: |
-          cd desktop/projekt
           dotnet restore klassupg.csproj
           dotnet publish klassupg.csproj -o ../../klassupg
 
