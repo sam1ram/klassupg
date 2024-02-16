@@ -20,13 +20,14 @@ jobs:
 
       - name: Build project
         run: |
-          dotnet restore desktop/projekt/klassupg.csproj
-          dotnet publish desktop/projekt/klassupg.csproj -o klassupg
+          cd desktop/projekt
+          dotnet restore klassupg.csproj
+          dotnet publish klassupg.csproj -o ../../klassupg
 
       - name: create zip package
         run: |
           cd klassupg
-          zip -r ../klassupg.zip .
+          zip -r ../../klassupg.zip .
 
       - name: Deploy to aws EB
         uses: einaregilsson/beanstalk-deploy@v21
