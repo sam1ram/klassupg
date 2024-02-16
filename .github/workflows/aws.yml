@@ -20,12 +20,12 @@ jobs:
 
       - name: Build project
         run: |
-          dotnet restore projekt/klassupg.csproj
-          dotnet publish projekt/klassupg.csproj -o klassupg
+          dotnet restore desktop/projekt/klassupg.csproj
+          dotnet publish desktop/projekt/klassupg.csproj -o klassupg
 
       - name: create zip package
         run: |
-          cd projekt
+          cd klassupg
           zip -r ../klassupg.zip .
 
       - name: Deploy to aws EB
