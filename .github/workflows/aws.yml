@@ -15,21 +15,23 @@ jobs:
 
     steps:
       - name: checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
 
       - name: Setup dotnet
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '6.0'
 
 
       - name: Build project
-        run: dotnet restore; dotnet publish -o site;
+        run: |
+        dotnet restore klassupg/klassupg.csproj
+        dotnet publish klassupg/klassupg.csproj -o klassupg
 
 
       - name: create zip package
-        run: cd site; zip ../site.zip *;
+        run: cd klassupg; zip ../klassupg.zip*;
 
 
       - name: Deploy to aws EB
@@ -41,4 +43,4 @@ jobs:
           environment_name: Klassupg-env-1
           version_label: ${{github.run_id}}
           region: eu-north-1
-          deployment_package: site.zip
+          deployment_package: klassupg.zip
