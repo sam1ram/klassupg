@@ -25,7 +25,7 @@ jobs:
 
       - name: create zip package
         run: |
-          cd klassupg
+          cd projekt
           zip -r ../klassupg.zip .
 
       - name: Deploy to aws EB
