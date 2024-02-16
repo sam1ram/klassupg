@@ -10,32 +10,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: checkout repo
-        uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v2
 
-      - name: Setup dotnet
-        uses: actions/setup-dotnet@v4
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '6.0'
+          dotnet-version: '8.0.101' # Uppdaterad version till 8.0.101
 
-      - name: Build project
+      - name: Build and Publish Project
         run: |
           cd desktop/projekt
           dotnet restore klassupg.csproj
           dotnet publish klassupg.csproj -o ../../klassupg
 
-      - name: create zip package
+      - name: Create Zip Package
         run: |
           cd klassupg
           zip -r ../../klassupg.zip .
 
-      - name: Deploy to aws EB
+      - name: Deploy to AWS Elastic Beanstalk
         uses: einaregilsson/beanstalk-deploy@v21
         with:
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID}}
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
           application_name: klassupg
           environment_name: Klassupg-env-1
-          version_label: ${{github.run_id}}
+          version_label: ${{ github.run_id }}
           region: eu-north-1
           deployment_package: klassupg.zip
