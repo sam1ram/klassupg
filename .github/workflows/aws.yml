@@ -16,23 +16,23 @@ jobs:
       - name: Setup .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '8.0.101' 
+          dotnet-version: '8.0.101'
 
       - name: Build and Publish Project
         run: |
-          dotnet restore klassupg.csproj
-          dotnet publish klassupg.csproj -o ../../klassupg
+          dotnet restore
+          dotnet publish -c Release -o ./publish
 
       - name: Create Zip Package
         run: |
-          cd projekt/klassupg
-          zip -r ../../klassupg.zip .
+          cd ./publish
+          zip -r ../klassupg.zip .
 
       - name: Deploy to AWS Elastic Beanstalk
         uses: einaregilsson/beanstalk-deploy@v21
         with:
-          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID}}
-          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           application_name: klassupg
           environment_name: Klassupg-env-1
           version_label: ${{ github.run_id }}
