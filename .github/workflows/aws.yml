@@ -1,38 +1,32 @@
 name: Build-aws
 
-
 on:
   push:
     branches:
       - master
 
-
-
 jobs:
   build:
     runs-on: ubuntu-latest
 
-
     steps:
       - name: checkout repo
         uses: actions/checkout@v4
-
 
       - name: Setup dotnet
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '6.0'
 
-
       - name: Build project
         run: |
-        dotnet restore klassupg/klassupg.csproj
-        dotnet publish klassupg/klassupg.csproj -o klassupg
-
+          dotnet restore klassupg/klassupg.csproj
+          dotnet publish klassupg/klassupg.csproj -o klassupg
 
       - name: create zip package
-        run: cd klassupg; zip ../klassupg.zip*;
-
+        run: |
+          cd klassupg
+          zip -r ../klassupg.zip .
 
       - name: Deploy to aws EB
         uses: einaregilsson/beanstalk-deploy@v21
