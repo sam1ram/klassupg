@@ -20,8 +20,8 @@ jobs:
 
       - name: Build project
         run: |
-          dotnet restore klassupg/klassupg.csproj
-          dotnet publish klassupg/klassupg.csproj -o klassupg
+          dotnet restore projekt/klassupg.csproj
+          dotnet publish projekt/klassupg.csproj -o klassupg
 
       - name: create zip package
         run: |
