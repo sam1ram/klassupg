@@ -8,6 +8,8 @@ using System.Text.Json;
 var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
 
+// Lägg till den nya kodbiten här
+
 app.MapGet("/", () => "Hello World!");
 
 // Endpoint för att hämta klassinformation
