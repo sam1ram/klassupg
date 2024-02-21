@@ -59,7 +59,7 @@ app.Run();
 public class Klass
 {
     public int id { get; set; }
-    public string namn { get; set; }
+    public string namn { get; set; } = "";
     public List<Elev> elever { get; set; }
 
     public Klass()
@@ -71,9 +71,9 @@ public class Klass
 
 public class Elev
 {
-    public int id { get; set; }
-    public string namn { get; set; }
-    public int ålder { get; set; }
+    public int id { get; set; } 
+    public string namn { get; set; } ="";
+    public int ålder { get; set; } 
 
     public Elev()
     {
