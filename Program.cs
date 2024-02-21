@@ -64,6 +64,12 @@ public class Klass
     public int id { get; set; }
     public string namn { get; set; }
     public List<Elev> elever { get; set; }
+
+    public Klass()
+    {
+        
+        elever = new List<Elev>();
+    }
 }
 
 public class Elev
@@ -71,4 +77,10 @@ public class Elev
     public int id { get; set; }
     public string namn { get; set; }
     public int ålder { get; set; }
+
+    public Elev()
+    {
+        
+        ålder = 0;
+    }
 }
