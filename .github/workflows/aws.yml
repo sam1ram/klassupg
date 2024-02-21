@@ -21,7 +21,7 @@ jobs:
       - name: Build and Publish Project
         run: |
           dotnet restore
-          dotnet publish -c Release -o ./publish
+          dotnet publish -c Release -o ./publish/klassupg
 
       - name: Create Zip Package
         run: |
