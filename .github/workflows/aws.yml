@@ -27,7 +27,7 @@ jobs:
           cd site
           zip -r ../klassupg.zip .
           cd ..
-
+          
 
       - name: Deploy to AWS Elastic Beanstalk
         uses: einaregilsson/beanstalk-deploy@v21
