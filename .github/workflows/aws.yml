@@ -23,9 +23,12 @@ jobs:
         run: dotnet restore; dotnet publish -o site;
 
       - name: create zip package
-        run:  cd site
+        run:  |
+          cd site
           zip -r ../klassupg.zip .
           cd ..
+
+
       - name: Deploy to AWS Elastic Beanstalk
         uses: einaregilsson/beanstalk-deploy@v21
         with:
