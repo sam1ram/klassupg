@@ -11,3 +11,5 @@ obj/
 *.sln
 *.vcproj
 *.csproj.user
+
+.fake
