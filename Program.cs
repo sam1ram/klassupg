@@ -1,10 +1,9 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
@@ -24,52 +23,37 @@ var klass = new Klass
     }
 };
 
+
+var encryptionService = new EncryptionService();
+
 app.MapGet("/klass", (HttpContext httpContext) => Results.Ok(klass));
 
 app.MapGet("/elever/{id}", (HttpContext httpContext, int id) =>
 {
     var elev = klass.elever.FirstOrDefault(e => e.id == id);
-    return elev != null ? Results.Ok(EncryptData(elev, encryptionKey)) : Results.NotFound();
+    return elev != null ? Results.Ok(encryptionService.Encrypt(JsonSerializer.Serialize(elev))) : Results.NotFound();
 });
 
 app.MapPost("/elever", (HttpContext httpContext) =>
 {
     var encryptedElev = httpContext.Request.ReadFromJsonAsync<string>().Result;
-    var decryptedElev = DecryptData<Elev>(encryptedElev, encryptionKey);
+    var decryptedElev = JsonSerializer.Deserialize<Elev>(encryptionService.Decrypt(encryptedElev));
     klass.elever.Add(decryptedElev);
     return Results.Created($"/elever/{decryptedElev.id}", decryptedElev);
 });
 
+// Endpoint för att kryptera och avkryptera elev id
+app.MapGet("/elevid", (HttpContext httpContext) => Results.Ok(encryptionService.Encrypt(klass.id.ToString())));
+
+app.MapPost("/elevid", (HttpContext httpContext) =>
+{
+    var encryptedId = httpContext.Request.ReadFromJsonAsync<string>().Result;
+    var decryptedId = encryptionService.Decrypt(encryptedId);
+    klass.id = int.Parse(decryptedId);
+    return Results.Ok(klass.id);
+});
+
 app.Run();
-
-static string EncryptData<T>(T data, string key)
-{
-    var jsonString = JsonSerializer.Serialize(data);
-    byte[] jsonData = Encoding.UTF8.GetBytes(jsonString);
-    using var aes = Aes.Create();
-    aes.Key = Encoding.UTF8.GetBytes(key);
-    aes.IV = new byte[16];
-    using var ms = new MemoryStream();
-    using var cs = new CryptoStream(ms, aes.CreateEncryptor(), CryptoStreamMode.Write);
-    cs.Write(jsonData, 0, jsonData.Length);
-    cs.FlushFinalBlock();
-    return Convert.ToBase64String(ms.ToArray());
-}
-
-static T DecryptData<T>(string encryptedData, string key)
-{
-    byte[] encryptedBytes = Convert.FromBase64String(encryptedData);
-    using var aes = Aes.Create();
-    aes.Key = Encoding.UTF8.GetBytes(key);
-    aes.IV = new byte[16];
-    using var ms = new MemoryStream();
-    using var cs = new CryptoStream(ms, aes.CreateDecryptor(), CryptoStreamMode.Write);
-    cs.Write(encryptedBytes, 0, encryptedBytes.Length);
-    cs.FlushFinalBlock();
-    byte[] decryptedBytes = ms.ToArray();
-    string decryptedString = Encoding.UTF8.GetString(decryptedBytes);
-    return JsonSerializer.Deserialize<T>(decryptedString);
-}
 
 public class Klass
 {
@@ -92,5 +76,20 @@ public class Elev
     public Elev()
     {
         ålder = 0;
+    }
+}
+
+public class EncryptionService
+{
+    public string Encrypt(string plaintext)
+    {
+        byte[] textAsBytes = Encoding.UTF8.GetBytes(plaintext);
+        return Convert.ToBase64String(textAsBytes);
+    }
+
+    public string Decrypt(string encryptedText)
+    {
+        byte[] textAsBytes = Convert.FromBase64String(encryptedText);
+        return Encoding.UTF8.GetString(textAsBytes);
     }
 }
