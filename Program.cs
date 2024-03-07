@@ -1,56 +1,44 @@
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 using System.Text;
 using System.Text.Json;
+using System.Collections.Generic;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Lägg till tjänster för Swagger
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// Skapar EncryptionService som en singleton-tjänst
+builder.Services.AddSingleton<EncryptionService>();
+
 var app = builder.Build();
 
-string encryptionKey = "MyEncryptionKey123";
+// Använder Swagger UI
+app.UseSwagger();
+app.UseSwaggerUI();
 
-var klass = new Klass
+// Krypterar endpoint
+app.MapPost("/encrypt", (EncryptionService encryptionService, Klass klassToEncrypt) =>
 {
-    id = 1,
-    namn = "KlassA",
-    elever = new List<Elev>
+    var klassJson = JsonSerializer.Serialize(klassToEncrypt);
+    return Results.Ok(new { encryptedText = encryptionService.Encrypt(klassJson) });
+});
+
+// Avkrypterar endpoint
+app.MapPost("/decrypt", (EncryptionService encryptionService, string encryptedText) =>
+{
+    var decryptedText = encryptionService.Decrypt(encryptedText);
+    try
     {
-        new Elev { id = 1, namn = "Jessica", ålder = 15},
-        new Elev { id = 2, namn = "Kevin", ålder = 14}
+        var klass = JsonSerializer.Deserialize<Klass>(decryptedText);
+        return Results.Ok(klass);
     }
-};
-
-
-var encryptionService = new EncryptionService();
-
-app.MapGet("/klass", (HttpContext httpContext) => Results.Ok(klass));
-
-app.MapGet("/elever/{id}", (HttpContext httpContext, int id) =>
-{
-    var elev = klass.elever.FirstOrDefault(e => e.id == id);
-    return elev != null ? Results.Ok(encryptionService.Encrypt(JsonSerializer.Serialize(elev))) : Results.NotFound();
-});
-
-app.MapPost("/elever", (HttpContext httpContext) =>
-{
-    var encryptedElev = httpContext.Request.ReadFromJsonAsync<string>().Result;
-    var decryptedElev = JsonSerializer.Deserialize<Elev>(encryptionService.Decrypt(encryptedElev));
-    klass.elever.Add(decryptedElev);
-    return Results.Created($"/elever/{decryptedElev.id}", decryptedElev);
-});
-
-// Endpoint för att kryptera och avkryptera elev id
-app.MapGet("/elevid", (HttpContext httpContext) => Results.Ok(encryptionService.Encrypt(klass.id.ToString())));
-
-app.MapPost("/elevid", (HttpContext httpContext) =>
-{
-    var encryptedId = httpContext.Request.ReadFromJsonAsync<string>().Result;
-    var decryptedId = encryptionService.Decrypt(encryptedId);
-    klass.id = int.Parse(decryptedId);
-    return Results.Ok(klass.id);
+    catch
+    {
+        return Results.BadRequest("Decryption failed or the decrypted text is not a valid Klass object.");
+    }
 });
 
 app.Run();
@@ -59,12 +47,7 @@ public class Klass
 {
     public int id { get; set; }
     public string namn { get; set; } = "";
-    public List<Elev> elever { get; set; }
-
-    public Klass()
-    {
-        elever = new List<Elev>();
-    }
+    public List<Elev> elever { get; set; } = new();
 }
 
 public class Elev
@@ -72,11 +55,6 @@ public class Elev
     public int id { get; set; }
     public string namn { get; set; } = "";
     public int ålder { get; set; }
-
-    public Elev()
-    {
-        ålder = 0;
-    }
 }
 
 public class EncryptionService
